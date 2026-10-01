@@ -1,239 +1,288 @@
-# Medallion Architecture Pipeline with Explicit Data Quality Remediation
+# Medallion Data Pipeline
 
-![Python](https://img.shields.io/badge/Python-3.9+-blue)
-![Pandas](https://img.shields.io/badge/Pandas-Data%20Processing-orange)
-![SQL](https://img.shields.io/badge/SQL-Data%20Modelling-green)
-![GitHub](https://img.shields.io/badge/Version%20Control-Git-black)
+This repository implements a simple medallion-style data pipeline for sales data using Python, MySQL, and SQL. The project follows the Bronze -> Silver -> Gold pattern and is designed to ingest raw sales records, profile and clean data quality issues, and prepare a star-schema analytics model for reporting.
 
-## Project Overview
+## Overview
 
-This project implements a complete **Medallion Architecture** (Bronze → Silver → Gold) data pipeline that transforms raw, messy sales data into a clean, reliable, and analytics-ready **Single Source of Truth**.
+The project is focused on building a practical data engineering workflow for a sales dataset stored in CSV format. It demonstrates how raw transactional data can move through layered processing stages:
 
-The primary focus is on **explicit data quality remediation** in the Silver layer to handle real-world data issues such as null values, duplicates, inconsistent formats, and invalid records.
+- Bronze: raw ingestion with metadata capture
+- Silver: cleaning, standardization, and quality checks
+- Gold: dimensional tables and fact table for analytics
 
----
+The dataset used in the project is the `train.csv` file located under `data/bronze/`.
 
-## Project Objective
+## Business Use Case
 
-To design and build an end-to-end batch data pipeline using Medallion Architecture that:
+Raw datasets often contain data quality problems such as:
 
-- Ingests raw sales data (Bronze)
-- Applies comprehensive data quality rules and standardization (Silver)
-- Creates a business-ready dimensional model (Gold)
-- Enables trustworthy analytics and reporting
+- missing postal codes or null values
+- date values stored as strings
+- duplicate rows or repeated identifiers
+- inconsistent formatting in text categories
+- invalid or unrealistic sales values
+- ship dates earlier than order dates
 
----
-
-## Business Problem
-
-Raw data from source systems is often poor in quality. Common issues include:
-
-- Missing / null values
-- Duplicate records
-- Inconsistent formatting (e.g., "USA", "US", "United States")
-- Invalid values (negative sales/quantity, future dates, etc.)
-
-These problems lead to inaccurate reports and poor business decisions.  
-This project solves the problem by creating a structured, high-quality data pipeline.
-
----
-
-## Architecture
-
-The pipeline follows the **Medallion Architecture**:
-
-| Layer   | Purpose                              | Key Activities                              |
-|---------|--------------------------------------|---------------------------------------------|
-| Bronze  | Raw data landing zone                | Ingest data as-is + add metadata           |
-| Silver  | Cleaned & standardized data          | Data quality remediation + transformation   |
-| Gold    | Business-ready analytics layer       | Dimensional modelling (Star Schema)         |
-
----
+This project shows how those issues can be identified and addressed before the data is used for reporting and analytics.
 
 ## Tech Stack
 
-- **Language**: Python (pandas)
-- **Storage**: Local files (CSV / Parquet) + Optional AWS S3
-- **Query Engine**: SQL (SQLite / PostgreSQL / Amazon Athena)
-- **Version Control**: Git + GitHub
-- **Optional**: Power BI / Tableau Public for visualization
-
----
-
-## Key Features
-
-- Full Medallion Architecture implementation
-- Explicit data quality rules in Silver layer
-- Handling of nulls, duplicates, inconsistencies, and invalid values
-- Star Schema dimensional modelling in Gold layer
-- Modular and reproducible pipeline
-- Clear documentation and data quality reporting
-
----
-
-## Project Structure
+- Python 3
+- pandas
+- SQLAlchemy
+- PyMySQL
+- MySQL
+- SQL scripts for database setup and transformations
+- Jupyter notebooks for exploratory and transformation work
 
 ## Project Structure
 
 ```text
-medallion-data-quality-pipeline/
+medallion-data-pipeline/
 ├── data/
-│   ├── bronze/
-│   ├── silver/
-│   └── gold/
+│   └── bronze/
+│       └── train.csv
 ├── docs/
-├── notebooks/
+│   └── 02_quality_report.md
 ├── scripts/
 │   ├── bronze/
 │   │   └── 01_load_bronze.py
 │   ├── silver/
-│   │   └── 02_clean_silver.py
+│   │   ├── 02_clean_silver.ipynb
+│   │   └── 02_quality_report.ipynb
 │   └── gold/
-│       └── 03_load_gold.py
+│       └── 03_load_gold.ipynb
 ├── sql/
 │   ├── bronze/
+│   │   └── init_bronze_table.sql
 │   ├── silver/
-│   │   └── data_quality_checks.sql
+│   │   └── init_silver_table.sql
 │   └── gold/
-│       ├── create_dim_customer.sql
-│       ├── create_dim_product.sql
-│       ├── create_dim_location.sql
-│       ├── create_dim_date.sql
-│       ├── create_fact_sales.sql
-│       └── analytical_queries.sql
-├── tests/
+│       ├── dim_customer.sql
+│       ├── dim_date.sql
+│       ├── dim_location.sql
+│       ├── dim_product.sql
+│       └── fact_sales.sql
 ├── README.md
-└── requirements.txt
-```
----
-
-##  Pipeline Flow
-
-1. **Bronze Layer**  
-   - Extract raw CSV data  
-   - Add metadata (`ingestion_timestamp`, `source_file_name`)  
-   - Store as-is
-
-2. **Silver Layer**  
-   - Handle missing values  
-   - Remove duplicates  
-   - Standardize categorical fields  
-   - Fix invalid records (negative values, bad dates)  
-   - Correct data types  
-   - Create derived columns  
-   - Generate Data Quality Report
-
-3. **Gold Layer**  
-   - Design Star Schema  
-   - Create Fact and Dimension tables  
-   - Load analytics-ready data
-
----
-## Data Quality Rules Applied (Silver Layer)
-
-- Handled missing and null values
-- Removed duplicate records
-- Standardized categorical values (Ship Mode, Segment, Region, etc.)
-- Corrected invalid values (e.g. negative sales)
-- Fixed data types (dates, numerical columns)
-- Created derived columns (Order Year, Order Month, etc.)
-
----
-
-## Gold Layer – Star Schema
-
-- **Fact Table**: `fact_sales`
-- **Dimension Tables**:
-  - `dim_customer`
-  - `dim_product`
-  - `dim_location`
-  - `dim_date`
-
----
-## How to Run the Project
-
-### 1. Clone the Repository
-```bash
-git clone <repository-url>
-cd medallion-data-quality-pipeline
+├── requirements.txt
+└── LICENSE
 ```
 
-2. Install Dependencies
+## Database Architecture
+
+### Bronze Layer
+
+The Bronze layer stores raw sales data with minimal transformation. It preserves the original source values and adds metadata for lineage and auditing.
+
+The table created in `sql/bronze/init_bronze_table.sql` is:
+
+- `bronze_sales`
+
+Columns include the original sales fields plus:
+
+- `ingestion_timestamp`
+- `source_file_name`
+- `load_id`
+
+These metadata columns help track when a batch was loaded and where it came from.
+
+### Silver Layer
+
+The Silver layer is the quality-control layer. The table created in `sql/silver/init_silver_table.sql` is:
+
+- `silver_sales`
+
+This layer is intended to store cleaned records with:
+
+- date columns converted to proper `DATE` values
+- standard text formatting
+- derived date fields such as year, month, and day
+- standardized sales values and cleaned keys
+- a processing timestamp for auditing
+
+The project includes a quality analysis notebook and a written report documenting the remediation rules.
+
+### Gold Layer
+
+The Gold layer is the analytics layer built around a star schema. The SQL scripts in `sql/gold/` define:
+
+- `dim_customer`
+- `dim_product`
+- `dim_location`
+- `dim_date`
+- `fact_sales`
+
+These tables are designed for business reporting and KPI analysis.
+
+## Pipeline Flow
+
+1. Load raw CSV into MySQL Bronze table
+2. Profile the data for quality issues
+3. Clean and standardize values in the Silver layer
+4. Build the Gold dimensional model for analytics
+
+## Current Implementation Details
+
+### Bronze ingestion
+
+The Bronze loader script is:
+
+- `scripts/bronze/01_load_bronze.py`
+
+This script:
+
+- reads the raw file from `data/bronze/train.csv`
+- adds metadata columns
+- renames source columns into a snake_case format
+- connects to MySQL using SQLAlchemy and environment variables
+- appends the data to the `bronze_sales` table
+
+### Quality audit
+
+The project includes:
+
+- `scripts/silver/02_quality_report.ipynb`
+- `docs/02_quality_report.md`
+
+These materials identify issues such as:
+
+- null or missing values
+- invalid date logic
+- duplicate identifiers
+- negative or zero sales values
+- whitespace issues in text fields
+- postal code and category validation concerns
+
+### Silver cleaning notebook
+
+The Silver transformation work is planned in:
+
+- `scripts/silver/02_clean_silver.ipynb`
+
+This notebook is intended to apply the rules documented in the quality report and write the cleaned data into the Silver table.
+
+### Gold transformation notebook
+
+The Gold layer model is prepared in:
+
+- `scripts/gold/03_load_gold.ipynb`
+
+This notebook is intended to create or populate the dimensional tables and fact table used for analytical queries.
+
+## Required Setup
+
+### 1. Install Python dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Prepare the Data
+The current `requirements.txt` includes:
 
-   Place your raw dataset files inside the data/bronze/ directory before starting the pipeline.
+```text
+python-dotenv
+```
 
-5. Execute the Pipeline
-
-   Run the pipeline scripts sequentially:
+For the notebook and database work, install the additional packages used by the project:
 
 ```bash
-# Step 1: Ingest raw data into Bronze layer
+pip install pandas sqlalchemy pymysql python-dotenv jupyter
+```
+
+### 2. Create a MySQL database and tables
+
+Run the SQL setup scripts in order:
+
+```sql
+-- Bronze table
+sql/bronze/init_bronze_table.sql
+
+-- Silver table
+sql/silver/init_silver_table.sql
+```
+
+Then create the Gold tables:
+
+```sql
+sql/gold/dim_customer.sql
+sql/gold/dim_product.sql
+sql/gold/dim_location.sql
+sql/gold/dim_date.sql
+sql/gold/fact_sales.sql
+```
+
+### 3. Configure environment variables
+
+Create a `.env` file in the project root with MySQL connection settings similar to:
+
+```env
+MYSQL_USER=root
+MYSQL_PASSWORD=your_password
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_DATABASE=DataWarehouse
+```
+
+The Bronze loader uses these variables to connect to MySQL through SQLAlchemy.
+
+## How to Run the Project
+
+### Step 1: Create the database objects
+
+Run the Bronze SQL initialization script before loading data.
+
+### Step 2: Ingest raw data into Bronze
+
+```bash
 python scripts/bronze/01_load_bronze.py
-
-# Step 2: Clean, validate, and write to Silver layer
-python scripts/silver/02_clean_silver.py
-
-# Step 3: Transform into Gold layer dimensional models
-python scripts/gold/03_load_gold.py
 ```
 
-5. Data Analysis & Queries
+This loads `data/bronze/train.csv` into the `bronze_sales` table.
 
-   Use the SQL scripts located in the sql/ directory for schema creation, views, and downstream analytical queries:
+### Step 3: Audit data quality
+
+Open the notebook:
 
 ```bash
-# Executable via your database CLI or SQL client
-sql/01_create_tables.sql
-sql/02_analytical_queries.sql
+jupyter notebook scripts/silver/02_quality_report.ipynb
 ```
 
-## Deliverables
+or review the static summary in:
 
-- Complete Bronze → Silver → Gold pipeline
-- Modular Python scripts
-- SQL scripts for quality checks and analytics
-- Data Quality Report
-- Well-documented GitHub repository
-- (Optional) Dashboard on Gold layer
+- `docs/02_quality_report.md`
 
+### Step 4: Build the Silver layer
 
-## Success Criteria
+Use the notebook in `scripts/silver/02_clean_silver.ipynb` to perform the cleaning and write transformed records into `silver_sales`.
 
-- Raw data successfully landed in Bronze layer
-- Clear improvement in data quality in Silver layer
-- Proper Star Schema implemented in Gold layer
-- Analytical queries run successfully
-- Project is fully reproducible from GitHub
-- Architecture and design decisions can be clearly explained
+### Step 5: Build the Gold layer
 
+Open:
 
-## Scope
-In Scope
+```bash
+jupyter notebook scripts/gold/03_load_gold.ipynb
+```
 
-- Batch ETL pipeline
-- Explicit data quality remediation
-- Dimensional modelling (Star Schema)
-- Optional cloud storage (AWS S3)
+and populate the fact and dimension tables for analysis.
 
-Out of Scope
+## Data Quality Rules Covered
 
-- Real-time streaming
-- Advanced orchestration (Airflow, etc.)
-- Machine Learning models
-- Multiple complex source systems
+The project explicitly documents and validates quality rules such as:
 
-## Key Learnings
+- missing postal codes are preserved when required
+- date columns are normalized to proper SQL `DATE` values
+- duplicate rows are examined and removed as needed
+- sales amounts are validated for positive values
+- text values are cleaned and standardized
+- order and shipping date consistency is maintained
 
-- Understanding of Medallion Architecture
-- Practical implementation of data quality rules
-- Dimensional modelling using Star Schema
-- Building a clean and reproducible data pipeline
-- Combining Python and SQL for data engineering tasks
+## Notes
+
+This repository is a learning-focused ETL project and is not a full production orchestration platform. It demonstrates the core concepts of medallion architecture, SQL-based warehousing, and explicit quality remediation in a practical, easy-to-follow structure.
+
+## License
+
+This project is provided under the repository license in `LICENSE`.
 
 ### Author
 
