@@ -1,1 +1,10 @@
+python-dotenvpandas
+sqlalchemy
+pymysql
 python-dotenv
+jupyter
+
+scikit-learn
+matplotlib
+seaborn
+joblib
