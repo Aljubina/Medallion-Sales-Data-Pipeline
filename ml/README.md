@@ -35,6 +35,32 @@ Gold Layer
 09. Evaluate / visualize
 ```
 
+### RFM Data workflow
+
+```text
+RFM Data
+   ↓
+Load RFM
+   ↓
+Select Recency, Frequency, Monetary
+   ↓
+Inspect distributions
+   ↓
+Log Transformation (only if useful)
+   ↓
+StandardScaler
+   ↓
+Try K = 2,3,4,5,6
+   ↓
+Elbow Method + Silhouette Score
+   ↓
+Choose K
+   ↓
+Train final K-Means
+   ↓
+Return trained model + customer clusters
+```
+
 ## 01. RFM Calculation
 
 The first step calculates the core customer-value features:
@@ -85,7 +111,7 @@ This helps decide how many segments are meaningful and not artificially over-seg
 
 Once the optimal K is selected, the K-Means clustering algorithm is trained on the scaled customer features.
 
-The model groups customers into clusters based on similarity in buying behavior. Each cluster represents a type of customer pattern, such as high-value frequent buyers or low-engagement customers.
+The model groups customers into clusters based on similarity in buying behavior. Each cluster represents a type of customer pattern, such as high-value frequent buyers or low-engagement customers. The output of this stage is a trained K-Means model plus customer-level cluster assignments that can be used for downstream profiling and reporting.
 
 ## 06. Cluster Profiling
 
