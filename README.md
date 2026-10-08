@@ -114,6 +114,54 @@ The Gold layer is the analytics layer built around a star schema. The SQL script
 
 These tables are designed for business reporting and KPI analysis.
 
+### Gold Layer customer segmentation pipeline
+
+The Gold layer also includes a machine-learning segmentation workflow that turns customer transaction behavior into business segments. The pipeline follows this flow:
+
+```text
+Gold Layer
+   │
+   ▼
+01. RFM Calculation
+   │
+   ▼
+02. Feature Transformation
+   │
+   ▼
+03. Feature Scaling
+   │
+   ▼
+04. Find optimal K
+   │
+   ▼
+05. K-Means Training
+   │
+   ▼
+06. Cluster Profiling
+   │
+   ▼
+07. Assign business segment names
+   │
+   ▼
+08. Save segments to MySQL
+   │
+   ▼
+09. Evaluate / visualize
+```
+
+This workflow is implemented in the ML area of the project and is designed to:
+
+- calculate Recency, Frequency, and Monetary (RFM) values per customer
+- transform and scale customer features for clustering
+- determine the best number of clusters using an optimization process
+- train a K-Means model to group customers into meaningful cohorts
+- profile each cluster to understand purchase behavior
+- assign customer-friendly business segment names like Loyal, At Risk, or New
+- persist segment assignments to MySQL for downstream analytics
+- evaluate cluster quality and visualize the resulting segments
+
+See `ml/README.md` for the full pipeline documentation and implementation notes.
+
 ## Pipeline Flow
 
 1. Load raw CSV into MySQL Bronze table
