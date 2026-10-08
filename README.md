@@ -180,20 +180,42 @@ The recommended roadmap is:
 ```text
 medallion-data-pipeline/
 ├── data/
-│   ├── bronze/
-│   ├── silver/
-│   └── gold/
+│   └── bronze/
+│       └── train.csv
+├── docs/
+│   └── 02_quality_report.md
 ├── scripts/
+│   ├── bronze/
+│   │   └── 01_load_bronze.py
+│   ├── silver/
+│   │   ├── 02_clean_silver.ipynb
+│   │   └── 02_quality_report.ipynb
+│   └── gold/
+│       └── 03_load_gold.ipynb
 ├── sql/
+│   ├── bronze/
+│   │   └── init_bronze_table.sql
+│   ├── silver/
+│   │   └── init_silver_table.sql
+│   └── gold/
+│       ├── dim_customer.sql
+│       ├── dim_date.sql
+│       ├── dim_location.sql
+│       ├── dim_product.sql
+│       └── fact_sales.sql
 ├── ml/
-│   ├── 01_feature_engineering.py
-│   ├── 02_sales_forecasting.py
-│   ├── 03_customer_segmentation.py
-│   ├── models/
-│   └── evaluation/
+│   ├── README.md
+│   ├── features/
+│   │   └── features_engineering.ipynb
+│   └── segmentation/
+│       ├── rfm.py
+│       ├── train.py
+│       └── evaluate.py
 ├── ai/
+│   └── README.md
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+├── LICENSE
 ```
 
 ### Step-by-step ML plan
