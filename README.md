@@ -1,4 +1,4 @@
-# Medallion Data Pipeline
+# Medallion Sales Data Pipeline
 
 This repository implements a simple medallion-style data pipeline for sales data using Python, MySQL, and SQL. The project follows the Bronze -> Silver -> Gold pattern and is designed to ingest raw sales records, profile and clean data quality issues, and prepare a star-schema analytics model for reporting.
 
